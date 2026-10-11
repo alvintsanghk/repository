@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Dictation 1 · Colourful toys</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#fff8f0;--card:#ffffff;--ink:#3a2a3a;--muted:#7a6a7a;
+  --pink:#ff8fab;--pink-d:#ff6b8a;--blue:#7ec8e3;--blue-d:#5bb0d0;
+  --yellow:#ffe566;--green:#8fd9a8;--purple:#c9a0dc;--peach:#ffd4a8;
+  --shadow:0 8px 24px rgba(90,60,80,.12);
+  --radius:20px;
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;background:linear-gradient(165deg,#fff8f0 0%,#ffe8f0 45%,#e8f4ff 100%);color:var(--ink);overflow-x:hidden}
+body{display:flex;flex-direction:column;min-height:100dvh}
+.screen{display:none;flex:1;flex-direction:column;padding:16px 16px 28px;max-width:560px;margin:0 auto;width:100%}
+.screen.active{display:flex}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.btn-back,.btn-speak,.btn-icon{
+  border:none;background:#fff;border-radius:999px;padding:10px 16px;font-size:1rem;font-weight:700;
+  box-shadow:var(--shadow);color:var(--ink);cursor:pointer;min-height:44px
+}
+.btn-speak{background:var(--blue);color:#fff}
+.stars{font-size:1.35rem;letter-spacing:2px}
+h1{font-size:1.45rem;line-height:1.3;margin:4px 0 6px}
+.sub{color:var(--muted);font-size:.92rem;line-height:1.4;margin-bottom:16px}
+.card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:18px;margin-bottom:14px
+}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode-btn{
+  border:none;border-radius:18px;padding:18px 12px;min-height:110px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  font-weight:800;font-size:1.05rem;color:var(--ink);box-shadow:var(--shadow);
+  transition:transform .12s ease
+}
+.mode-btn:active{transform:scale(.96)}
+.mode-btn .emoji{font-size:2rem}
+.mode-btn.wide{grid-column:1 / -1;min-height:88px;flex-direction:row;gap:12px}
+.m1{background:linear-gradient(145deg,#ffe8f0,#ffd0e0)}
+.m2{background:linear-gradient(145deg,#e8f8ff,#cceeff)}
+.m3{background:linear-gradient(145deg,#fff6d6,#ffe8a0)}
+.m4{background:linear-gradient(145deg,#efe6ff,#ddd0ff)}
+.m5{background:linear-gradient(145deg,#e6ffe8,#c8f5d0)}
+.m6{background:linear-gradient(145deg,#ffe8d6,#ffd0b0)}
+.m7{background:linear-gradient(145deg,#e8eaff,#d0d6ff)}
+.big-word{font-size:clamp(1.8rem,8vw,2.6rem);font-weight:800;text-align:center;letter-spacing:.02em;margin:12px 0;word-break:break-word}
+.prompt{text-align:center;font-size:1.15rem;font-weight:700;margin-bottom:10px}
+.pic{font-size:4.5rem;text-align:center;line-height:1;margin:8px 0 16px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.08))}
+.choices{display:grid;grid-template-columns:1fr;gap:10px}
+.choices.cols2{grid-template-columns:1fr 1fr}
+.choice{
+  border:3px solid transparent;background:#fff;border-radius:16px;padding:16px 14px;
+  font-size:1.25rem;font-weight:700;cursor:pointer;box-shadow:var(--shadow);
+  min-height:58px;text-align:center
+}
+.choice.pic-choice{font-size:2.6rem;padding:20px;min-height:88px}
+.choice.correct{border-color:#4caf70;background:#e8f8ee}
+.choice.wrong{border-color:#e57373;background:#ffeaea;animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.letters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.letter-slot,.letter-tile{
+  width:48px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:800
+}
+.letter-slot{background:#f3eef5;border:2px dashed #cbb8d0;color:var(--muted)}
+.letter-slot.filled{background:#fff;border-style:solid;border-color:var(--pink);color:var(--ink)}
+.letter-tile{
+  background:linear-gradient(145deg,var(--pink),var(--pink-d));color:#fff;border:none;
+  box-shadow:0 4px 12px rgba(255,107,138,.35);cursor:pointer
+}
+.letter-tile.used{opacity:.35;pointer-events:none}
+.type-input{
+  display:block;width:100%;margin:14px 0 6px;padding:16px 14px;
+  font-size:clamp(1.4rem,6vw,1.9rem);font-weight:700;text-align:center;
+  border:3px solid #e8d8e8;border-radius:16px;background:#fffafc;color:var(--ink);
+  outline:none;-webkit-appearance:none;appearance:none
+}
+.type-input:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(255,143,171,.25)}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.btn-primary,.btn-soft{
+  border:none;border-radius:999px;padding:14px 22px;font-size:1.1rem;font-weight:800;
+  cursor:pointer;min-height:48px;box-shadow:var(--shadow)
+}
+.btn-primary{background:linear-gradient(145deg,var(--pink),var(--pink-d));color:#fff}
+.btn-soft{background:#fff;color:var(--ink)}
+.progress{height:10px;background:#f0e6ef;border-radius:999px;overflow:hidden;margin:8px 0 14px}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--blue));border-radius:999px;transition:width .25s}
+.feedback{text-align:center;font-size:1.2rem;font-weight:800;min-height:1.6em;margin:8px 0}
+.feedback.good{color:#2e8b57}
+.feedback.try{color:#c45c26}
+.score-big{font-size:3rem;text-align:center;margin:12px 0}
+.tip{background:#fff6e8;border-radius:14px;padding:12px 14px;font-size:.95rem;color:#6a5040;margin-top:10px;line-height:1.45}
+.footer-note{text-align:center;color:var(--muted);font-size:.85rem;margin-top:auto;padding-top:16px}
+.badge{display:inline-block;background:var(--yellow);border-radius:999px;padding:4px 10px;font-size:.8rem;font-weight:800}
+.sentence{font-size:1.35rem;font-weight:700;text-align:center;line-height:1.5;margin:16px 0}
+.blank{display:inline-block;min-width:2.2em;border-bottom:3px solid var(--pink);color:var(--pink);padding:0 4px}
+.phonics-tag{display:inline-block;background:var(--green);border-radius:10px;padding:4px 12px;font-weight:800;margin-bottom:8px}
+.hidden{display:none!important}
+#toast{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(120%);
+  background:#3a2a3a;color:#fff;padding:12px 18px;border-radius:999px;font-weight:700;
+  transition:transform .25s;z-index:50;max-width:90%;text-align:center
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- HOME -->
+<section id="home" class="screen active">
+  <div class="topbar">
+    <span class="badge">Dictation 1 · 16 Oct</span>
+    <span class="stars" id="homeStars">⭐ 0</span>
+  </div>
+  <h1>🌈 Colourful toys<br>默書小遊戲</h1>
+  <p class="sub">佛教榮茵學校 · P.1 · 1B Chapter 1<br>親子一齊玩，輕輕鬆鬆溫默書。</p>
+  <div class="mode-grid">
+    <button class="mode-btn m1" data-mode="listen"><span class="emoji">🎧</span>聽詞揀圖</button>
+    <button class="mode-btn m2" data-mode="spell"><span class="emoji">🔤</span>睇圖拼詞</button>
+    <button class="mode-btn m3" data-mode="sentence"><span class="emoji">✏️</span>句子填空</button>
+    <button class="mode-btn m4" data-mode="hf"><span class="emoji">⚡</span>高頻字快閃</button>
+    <button class="mode-btn m5" data-mode="phonics"><span class="emoji">🔊</span>Phonics 聽音</button>
+    <button class="mode-btn m6" data-mode="dictation"><span class="emoji">📝</span>模擬默書</button>
+    <button class="mode-btn m7 wide" data-mode="type"><span class="emoji">⌨️</span>真串字</button>
+  </div>
+  <div class="tip">📱 最穩喺呢個 App 入面直接開玩。Save 去「檔案」再開掣可能冇反應。開聲／靜音掣解鎖；家長可幫細路撳「讀」掣。</div>
+  <p id="bootBanner" class="footer-note" style="color:#2e8b57;font-weight:800">載入中…</p>
+  <p class="footer-note">温和鼓勵 · 冇罰分 · 星星攒多啲就叻仔／叻女！</p>
+</section>
+
+<!-- PLAY -->
+<section id="play" class="screen">
+  <div class="topbar">
+    <button class="btn-back" id="btnHome">← 主頁</button>
+    <span id="modeTitle" style="font-weight:800"></span>
+    <span class="stars" id="playStars">⭐ 0</span>
+  </div>
+  <div class="progress"><i id="bar"></i></div>
+  <div class="card" id="playCard">
+    <div class="prompt" id="prompt"></div>
+    <div class="pic" id="pic"></div>
+    <div class="big-word hidden" id="bigWord"></div>
+    <div class="sentence hidden" id="sentenceBox"></div>
+    <div class="letters hidden" id="slots"></div>
+    <div class="letters hidden" id="tiles"></div>
+    <input type="text" id="typeInput" class="type-input hidden" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" inputmode="text" placeholder="喺呢度打英文字…">
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions" id="actions"></div>
+    <div class="tip hidden" id="parentTip"></div>
+  </div>
+</section>
+
+<!-- RESULT -->
+<section id="result" class="screen">
+  <div class="card" style="margin-top:40px;text-align:center">
+    <div style="font-size:3rem">🎉</div>
+    <h1 id="resultTitle">好叻呀！</h1>
+    <div class="score-big" id="resultScore">⭐ 0</div>
+    <p class="sub" id="resultMsg"></p>
+    <div class="actions">
+      <button class="btn-primary" id="btnAgain">再玩一次</button>
+      <button class="btn-soft" id="btnToHome">返主頁</button>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ===== DATA ===== */
+const VOCAB = [
+  {id:'doll', text:'a doll', word:'doll', article:'a', emoji:'🪆', alts:['robot','car','ball']},
+  {id:'robot', text:'a robot', word:'robot', article:'a', emoji:'🤖', alts:['doll','plane','train']},
+  {id:'car', text:'a car', word:'car', article:'a', emoji:'🚗', alts:['train','ball','plane']},
+  {id:'train', text:'a train', word:'train', article:'a', emoji:'🚂', alts:['car','robot','plane']},
+  {id:'ball', text:'a ball', word:'ball', article:'a', emoji:'⚽', alts:['doll','car','plane']},
+  {id:'plane', text:'a plane', word:'plane', article:'a', emoji:'✈️', alts:['train','ball','robot']}
+];
+const SENTENCES = [
+  {full:'It is yellow and blue.', cloze:'It is _____ and blue.', answer:'yellow', choices:['yellow','purple','white','blue']},
+  {full:'What colour are the teddy bears?', cloze:'What _____ are the teddy bears?', answer:'colour', choices:['colour','cars','toys','blue']},
+  {full:'My cars are purple and white.', cloze:'My cars are _____ and white.', answer:'purple', choices:['purple','yellow','blue','old']}
+];
+const HF = ['she','in','old','six','this','on'];
+const PHONICS = [
+  {word:'sun', sound:'s', emoji:'☀️'},
+  {word:'sand', sound:'s', emoji:'🏖️'},
+  {word:'apple', sound:'a', emoji:'🍎'},
+  {word:'axe', sound:'a', emoji:'🪓'},
+  {word:'turtle', sound:'t', emoji:'🐢'},
+  {word:'teeth', sound:'t', emoji:'🦷'}
+];
+const PRAISE = ['叻仔／叻女！','好叻呀！','繼續加油！','星星又多咗！','Perfect！','Wow！','好醒目！'];
+
+/* ===== SAFE STORAGE (iOS file:// often throws on localStorage) ===== */
+let _memStars = 0;
+function loadStars(){
+  try{
+    if(typeof localStorage !== 'undefined'){
+      const v = localStorage.getItem('d1_stars');
+      if(v != null) return Number(v) || 0;
+    }
+  }catch(e){ /* SecurityError on file:// */ }
+  return _memStars;
+}
+function saveStars(n){
+  _memStars = n;
+  try{
+    if(typeof localStorage !== 'undefined'){
+      localStorage.setItem('d1_stars', String(n));
+    }
+  }catch(e){ /* keep in-memory */ }
+}
+
+/* ===== TAP HELPER (iOS Files / Quick Look: click alone often dead) ===== */
+function onTap(el, fn){
+  if(!el) return;
+  let lock = 0;
+  const run = function(ev){
+    const now = Date.now();
+    if(now - lock < 450) return;
+    lock = now;
+    if(ev && ev.cancelable) ev.preventDefault();
+    try{ fn(ev); }catch(err){ console && console.error && console.error(err); }
+  };
+  if(window.PointerEvent){
+    el.addEventListener('pointerup', run, {passive:false});
+  } else {
+    el.addEventListener('click', run);
+    el.addEventListener('touchend', run, {passive:false});
+  }
+}
+
+/* ===== STATE ===== */
+let totalStars = loadStars();
+let mode = null;
+let queue = [];
+let idx = 0;
+let roundStars = 0;
+let spellAnswer = '';
+let spellBuilt = [];
+let typeFails = 0;
+let typeLocked = false;
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+function updateStars(){
+  try{
+    $('homeStars').textContent = '⭐ '+totalStars;
+    $('playStars').textContent = '⭐ '+totalStars;
+  }catch(e){}
+  saveStars(totalStars);
+}
+function toast(msg){
+  const t=$('toast'); if(!t) return;
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),1800);
+}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b}
+function pickPraise(){return PRAISE[Math.floor(Math.random()*PRAISE.length)]}
+function setProgress(){
+  const pct = queue.length? Math.round((idx/queue.length)*100) : 0;
+  $('bar').style.width = pct+'%';
+}
+
+/* ===== TTS (never throw at startup) ===== */
+function canSpeak(){
+  try{
+    return !!(window.speechSynthesis && window.SpeechSynthesisUtterance);
+  }catch(e){ return false; }
+}
+/* iOS Web Speech often ignores rate; speak word-by-word with gaps + very low rate */
+const SPEAK_RATE = 0.35;
+const SPEAK_GAP_MS = 420;
+let speakTimer = null;
+function pickEnVoice(){
+  try{
+    const voices = window.speechSynthesis.getVoices()||[];
+    return voices.find(v=>/en(-|_)US/i.test(v.lang)) || voices.find(v=>/^en/i.test(v.lang)) || null;
+  }catch(e){ return null; }
+}
+function speak(text, lang){
+  lang = lang || 'en-US';
+  if(!canSpeak()){
+    try{
+      $('parentTip').classList.remove('hidden');
+      $('parentTip').textContent = '🔊 請家長讀出：「'+text+'」（慢速）';
+    }catch(e){}
+    return false;
+  }
+  try{ $('parentTip').classList.add('hidden'); }catch(e){}
+  try{
+    if(speakTimer){ clearTimeout(speakTimer); speakTimer=null; }
+    window.speechSynthesis.cancel();
+    const words = String(text).trim().split(/\s+/).filter(Boolean);
+    const voice = pickEnVoice();
+    let i = 0;
+    function next(){
+      if(i >= words.length) return;
+      const u = new SpeechSynthesisUtterance(words[i]);
+      u.lang = lang;
+      u.rate = SPEAK_RATE;
+      u.pitch = 1.0;
+      if(voice) u.voice = voice;
+      i++;
+      u.onend = function(){
+        if(i < words.length){
+          speakTimer = setTimeout(next, SPEAK_GAP_MS);
+        }
+      };
+      // iOS sometimes skips onend; also schedule fallback gap from estimated duration
+      const fallback = Math.max(700, words[i-1].length * 180) + SPEAK_GAP_MS;
+      const myI = i;
+      setTimeout(function(){
+        if(i === myI && i < words.length && !window.speechSynthesis.speaking){
+          next();
+        }
+      }, fallback);
+      try{ window.speechSynthesis.speak(u); }catch(e){}
+    }
+    next();
+    return true;
+  }catch(e){
+    try{
+      $('parentTip').classList.remove('hidden');
+      $('parentTip').textContent = '🔊 請家長讀出：「'+text+'」';
+    }catch(e2){}
+    return false;
+  }
+}
+try{
+  if(window.speechSynthesis){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function(){
+      try{ window.speechSynthesis.getVoices(); }catch(e){}
+    };
+  }
+}catch(e){}
+
+/* ===== MODE START ===== */
+const MODE_META = {
+  listen:{title:'🎧 聽詞揀圖', tip:'聽英文字，再揀啱嘅圖。'},
+  spell:{title:'🔤 睇圖拼詞', tip:'睇圖，再排啱字母。'},
+  sentence:{title:'✏️ 句子填空', tip:'揀啱個字填入句子。'},
+  hf:{title:'⚡ 高頻字快閃', tip:'記住個字，再快啲搵出嚟。'},
+  phonics:{title:'🔊 Phonics 聽音', tip:'聽／睇字，揀啱嘅 s / a / t 字。'},
+  dictation:{title:'📝 模擬默書', tip:'家長撳「讀」，小朋友揀／拼出答案。'},
+  type:{title:'⌨️ 真串字', tip:'聽完自己打，冇提示冇揀。'}
+};
+
+function startMode(m){
+  mode = m;
+  roundStars = 0;
+  idx = 0;
+  queue = buildQueue(m);
+  $('modeTitle').textContent = MODE_META[m].title;
+  showScreen('play');
+  renderQ();
+}
+
+function buildQueue(m){
+  if(m==='listen'){
+    return shuffle(VOCAB.map(v=>({type:'listen', item:v})));
+  }
+  if(m==='spell'){
+    return shuffle(VOCAB.map(v=>({type:'spell', item:v, target:v.text})));
+  }
+  if(m==='sentence'){
+    return shuffle(SENTENCES.map(s=>({type:'sentence', item:s})));
+  }
+  if(m==='hf'){
+    return shuffle(HF.map(w=>({type:'hf', item:w})));
+  }
+  if(m==='phonics'){
+    return shuffle(PHONICS.map(p=>({type:'phonics', item:p})));
+  }
+  if(m==='dictation'){
+    const q = [];
+    VOCAB.forEach(v=>q.push({type:'dict-vocab', item:v}));
+    SENTENCES.forEach(s=>q.push({type:'dict-sent', item:s}));
+    HF.forEach(w=>q.push({type:'dict-hf', item:w}));
+    PHONICS.forEach(p=>q.push({type:'dict-ph', item:p}));
+    return shuffle(q);
+  }
+  if(m==='type'){
+    const q = [];
+    VOCAB.forEach(v=>q.push({
+      type:'type',
+      kind:'vocab',
+      speak:v.text,
+      accept:[v.text, v.word],
+      reveal:v.text,
+      emoji:v.emoji
+    }));
+    SENTENCES.forEach(s=>q.push({
+      type:'type',
+      kind:'sentence',
+      speak:s.full,
+      accept:[s.full],
+      reveal:s.full,
+      emoji:''
+    }));
+    HF.forEach(w=>q.push({
+      type:'type',
+      kind:'hf',
+      speak:w,
+      accept:[w],
+      reveal:w,
+      emoji:''
+    }));
+    PHONICS.forEach(p=>q.push({
+      type:'type',
+      kind:'phonics',
+      speak:p.word,
+      accept:[p.word],
+      reveal:p.word,
+      emoji:p.emoji
+    }));
+    return shuffle(q);
+  }
+  return [];
+}
+
+/* ===== RENDER ===== */
+function clearPlay(){
+  $('prompt').textContent='';
+  $('pic').textContent='';
+  $('pic').classList.remove('hidden');
+  $('bigWord').classList.add('hidden');
+  $('bigWord').textContent='';
+  $('sentenceBox').classList.add('hidden');
+  $('sentenceBox').innerHTML='';
+  $('slots').classList.add('hidden'); $('slots').innerHTML='';
+  $('tiles').classList.add('hidden'); $('tiles').innerHTML='';
+  const ti=$('typeInput');
+  if(ti){
+    ti.classList.add('hidden');
+    ti.value='';
+    ti.disabled=false;
+    ti.readOnly=false;
+  }
+  $('choices').innerHTML='';
+  $('choices').className='choices';
+  $('feedback').textContent='';
+  $('feedback').className='feedback';
+  $('actions').innerHTML='';
+  $('parentTip').classList.add('hidden');
+  spellBuilt=[]; spellAnswer='';
+  typeFails=0; typeLocked=false;
+}
+
+function renderQ(){
+  clearPlay();
+  setProgress();
+  if(idx >= queue.length){ return finishRound(); }
+  const q = queue[idx];
+  if(q.type==='listen') renderListen(q.item);
+  else if(q.type==='spell') renderSpell(q.item, q.target);
+  else if(q.type==='sentence') renderSentence(q.item);
+  else if(q.type==='hf') renderHF(q.item);
+  else if(q.type==='phonics') renderPhonics(q.item);
+  else if(q.type==='dict-vocab') renderDictVocab(q.item);
+  else if(q.type==='dict-sent') renderDictSent(q.item);
+  else if(q.type==='dict-hf') renderDictHF(q.item);
+  else if(q.type==='dict-ph') renderDictPh(q.item);
+  else if(q.type==='type') renderType(q);
+}
+
+function addSpeakBtn(text){
+  const b=document.createElement('button');
+  b.className='btn-speak';
+  b.textContent='🔊 讀';
+  b.type='button';
+  onTap(b, function(){ speak(text); });
+  $('actions').appendChild(b);
+  setTimeout(function(){ speak(text); }, 280);
+}
+
+function correct(extraStars){
+  if(extraStars==null) extraStars=1;
+  roundStars += extraStars;
+  totalStars += extraStars;
+  updateStars();
+  $('feedback').textContent = '⭐ '+pickPraise();
+  $('feedback').className='feedback good';
+  toast('⭐ +'+extraStars);
+  setTimeout(function(){ idx++; renderQ(); }, 900);
+}
+function wrong(hint){
+  $('feedback').textContent = hint || '再試吓～';
+  $('feedback').className='feedback try';
+}
+
+/* --- Listen --- */
+function renderListen(v){
+  $('prompt').textContent = '聽英文字，揀啱嘅圖';
+  $('pic').classList.add('hidden');
+  const opts = shuffle([v].concat(v.alts.map(function(id){return VOCAB.find(function(x){return x.id===id;});}).filter(Boolean)).slice(0,3));
+  $('choices').className='choices cols2';
+  opts.forEach(function(o){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='choice pic-choice';
+    b.textContent=o.emoji;
+    b.setAttribute('aria-label', o.text);
+    onTap(b, function(){
+      if(o.id===v.id){ b.classList.add('correct'); correct(); }
+      else { b.classList.add('wrong'); wrong('唔係呢個～再揀！'); setTimeout(function(){ b.classList.remove('wrong'); },400); }
+    });
+    $('choices').appendChild(b);
+  });
+  addSpeakBtn(v.text);
+  if(!canSpeak()){
+    $('bigWord').classList.remove('hidden');
+    $('bigWord').textContent = v.text;
+  }
+}
+
+/* --- Spell --- */
+function renderSpell(v, target){
+  /* Always clear actions first so Clear / re-render never stacks 讀／清除／檢查 */
+  $('actions').innerHTML='';
+  $('feedback').textContent='';
+  $('feedback').className='feedback';
+
+  $('prompt').textContent = '睇圖，排啱個字';
+  $('pic').textContent = v.emoji;
+  $('pic').classList.remove('hidden');
+  spellAnswer = target;
+  spellBuilt = Array(target.length).fill(null);
+  const slots=$('slots'); slots.classList.remove('hidden'); slots.innerHTML='';
+  for(let i=0;i<target.length;i++){
+    const s=document.createElement('div');
+    s.className='letter-slot';
+    if(target[i]===' '){ s.textContent='·'; s.style.border='none'; s.style.background='transparent'; }
+    else { s.dataset.i=String(i); }
+    slots.appendChild(s);
+  }
+  const tiles=$('tiles'); tiles.classList.remove('hidden'); tiles.innerHTML='';
+  const letters = shuffle(target.replace(/ /g,'').split(''));
+  letters.forEach(function(ch,n){
+    const t=document.createElement('button');
+    t.type='button';
+    t.className='letter-tile';
+    t.textContent=ch;
+    t.dataset.ch=ch; t.dataset.n=String(n);
+    onTap(t, function(){ placeLetter(t); });
+    tiles.appendChild(t);
+  });
+  const clear=document.createElement('button');
+  clear.type='button';
+  clear.className='btn-soft'; clear.textContent='清除';
+  onTap(clear, function(){ renderSpell(v,target); });
+  $('actions').appendChild(clear);
+  const check=document.createElement('button');
+  check.type='button';
+  check.className='btn-primary'; check.textContent='檢查 ✓';
+  onTap(check, function(){ checkSpell(); });
+  $('actions').appendChild(check);
+  addSpeakBtn(target);
+}
+
+function placeLetter(tile){
+  if(tile.classList.contains('used')) return;
+  const slots=[].slice.call($('slots').children);
+  for(let i=0;i<slots.length;i++){
+    if(spellAnswer[i]===' ') continue;
+    if(!spellBuilt[i]){
+      spellBuilt[i]=tile.dataset.ch;
+      slots[i].textContent=tile.dataset.ch;
+      slots[i].classList.add('filled');
+      tile.classList.add('used');
+      tile.dataset.slot=String(i);
+      return;
+    }
+  }
+}
+function checkSpell(){
+  const got = spellAnswer.split('').map(function(ch,i){ return ch===' '?' ': (spellBuilt[i]||''); }).join('');
+  if(got===spellAnswer){ correct(2); }
+  else wrong('差少少～再排過！');
+}
+
+/* --- Sentence --- */
+function renderSentence(s){
+  $('prompt').textContent = '揀啱個字填空';
+  $('pic').classList.add('hidden');
+  $('sentenceBox').classList.remove('hidden');
+  $('sentenceBox').innerHTML = s.cloze.replace('_____','<span class="blank">？</span>');
+  shuffle(s.choices).forEach(function(c){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='choice';
+    b.textContent=c;
+    onTap(b, function(){
+      if(c===s.answer){
+        $('sentenceBox').innerHTML = s.full.replace(s.answer, '<span style="color:#2e8b57">'+s.answer+'</span>');
+        b.classList.add('correct'); correct(2);
+      } else { b.classList.add('wrong'); wrong('再諗諗～'); setTimeout(function(){ b.classList.remove('wrong'); },400); }
+    });
+    $('choices').appendChild(b);
+  });
+  addSpeakBtn(s.full);
+}
+
+/* --- HF --- */
+function renderHF(word){
+  $('prompt').textContent = '記住呢個字，再揀出嚟';
+  $('pic').classList.add('hidden');
+  $('bigWord').classList.remove('hidden');
+  $('bigWord').textContent = word;
+  setTimeout(function(){
+    $('bigWord').classList.add('hidden');
+    $('prompt').textContent = '邊個係啱嘅字？';
+    const distractors = shuffle(HF.filter(function(w){return w!==word;})).slice(0,3);
+    const opts = shuffle([word].concat(distractors));
+    opts.forEach(function(w){
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='choice';
+      b.textContent=w;
+      onTap(b, function(){
+        if(w===word){ b.classList.add('correct'); correct(); }
+        else { b.classList.add('wrong'); wrong('再試～'); setTimeout(function(){ b.classList.remove('wrong'); },400); }
+      });
+      $('choices').appendChild(b);
+    });
+  }, 1200);
+  addSpeakBtn(word);
+}
+
+/* --- Phonics --- */
+function renderPhonics(p){
+  $('prompt').innerHTML = 'Phonics · 揀 <span class="phonics-tag">'+p.sound+"</span> 音嘅字";
+  $('pic').textContent = p.emoji;
+  const seen={}; const uniq=[];
+  const pool = shuffle([p].concat(shuffle(PHONICS.filter(function(x){return x.word!==p.word;}))));
+  for(let i=0;i<pool.length;i++){
+    const o=pool[i];
+    if(seen[o.word]) continue; seen[o.word]=1; uniq.push(o); if(uniq.length===3) break;
+  }
+  uniq.forEach(function(o){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='choice';
+    b.innerHTML = o.emoji+' '+o.word;
+    onTap(b, function(){
+      if(o.word===p.word){ b.classList.add('correct'); correct(); }
+      else { b.classList.add('wrong'); wrong('聽清楚再揀～'); setTimeout(function(){ b.classList.remove('wrong'); },400); }
+    });
+    $('choices').appendChild(b);
+  });
+  addSpeakBtn(p.word);
+}
+
+/* --- Dictation variants --- */
+function renderDictVocab(v){
+  $('prompt').textContent = '模擬默書 · Vocabulary';
+  $('pic').classList.add('hidden');
+  $('bigWord').classList.add('hidden');
+  addSpeakBtn(v.text);
+  const wrongs = shuffle(VOCAB.filter(function(x){return x.id!==v.id;})).slice(0,2).map(function(x){return x.text;});
+  shuffle([v.text].concat(wrongs)).forEach(function(t){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='choice'; b.textContent=t;
+    onTap(b, function(){
+      if(t===v.text){ b.classList.add('correct'); correct(); }
+      else { b.classList.add('wrong'); wrong('再聽多次～'); setTimeout(function(){ b.classList.remove('wrong'); },400); }
+    });
+    $('choices').appendChild(b);
+  });
+  $('parentTip').classList.remove('hidden');
+  $('parentTip').textContent='家長可撳「讀」，小朋友聽完再揀。';
+}
+function renderDictSent(s){
+  $('prompt').textContent = '模擬默書 · Sentence';
+  $('pic').classList.add('hidden');
+  addSpeakBtn(s.full);
+  const others = SENTENCES.filter(function(x){return x.full!==s.full;}).map(function(x){return x.full;});
+  while(others.length<2) others.push('It is a toy.');
+  shuffle([s.full].concat(others.slice(0,2))).forEach(function(t){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='choice'; b.textContent=t; b.style.fontSize='1.05rem';
+    onTap(b, function(){
+      if(t===s.full){ b.classList.add('correct'); correct(2); }
+      else { b.classList.add('wrong'); wrong('再聽多次～'); setTimeout(function(){ b.classList.remove('wrong'); },400); }
+    });
+    $('choices').appendChild(b);
+  });
+  $('parentTip').classList.remove('hidden');
+  $('parentTip').textContent='家長讀成句，小朋友揀啱嗰句。';
+}
+function renderDictHF(w){
+  $('prompt').textContent = '模擬默書 · High Frequency';
+  $('pic').classList.add('hidden');
+  addSpeakBtn(w);
+  const distractors = shuffle(HF.filter(function(x){return x!==w;}).concat(['the','and','my','are'])).slice(0,3);
+  shuffle([w].concat(distractors)).forEach(function(t){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='choice'; b.textContent=t;
+    onTap(b, function(){
+      if(t===w){ b.classList.add('correct'); correct(); }
+      else { b.classList.add('wrong'); wrong('再試～'); setTimeout(function(){ b.classList.remove('wrong'); },400); }
+    });
+    $('choices').appendChild(b);
+  });
+}
+function renderDictPh(p){
+  $('prompt').textContent = '模擬默書 · Phonics';
+  $('pic').textContent = '？';
+  addSpeakBtn(p.word);
+  const distractors = shuffle(PHONICS.filter(function(x){return x.word!==p.word;})).slice(0,3);
+  shuffle([p].concat(distractors)).forEach(function(o){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='choice'; b.textContent=o.word;
+    onTap(b, function(){
+      if(o.word===p.word){ b.classList.add('correct'); $('pic').textContent=p.emoji; correct(); }
+      else { b.classList.add('wrong'); wrong('再聽～'); setTimeout(function(){ b.classList.remove('wrong'); },400); }
+    });
+    $('choices').appendChild(b);
+  });
+}
+
+/* --- True type / 真串字 --- */
+function normType(s){
+  return String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
+}
+function stripEndPunct(s){
+  return String(s||'').replace(/[.?!。？！]+$/g,'').trim();
+}
+function typeMatch(got, item){
+  const g = normType(got);
+  if(!g) return false;
+  if(item.kind==='vocab'){
+    return item.accept.some(function(a){ return normType(a)===g; });
+  }
+  if(item.kind==='sentence'){
+    const g2 = stripEndPunct(g);
+    return item.accept.some(function(a){
+      const a1 = normType(a);
+      const a2 = stripEndPunct(a1);
+      return g===a1 || g2===a2;
+    });
+  }
+  /* hf / phonics: exact word */
+  return item.accept.some(function(a){ return normType(a)===g; });
+}
+
+function renderType(item){
+  typeFails = 0;
+  typeLocked = false;
+  $('actions').innerHTML='';
+  $('prompt').textContent = '聽完自己打英文（冇提示）';
+  $('pic').classList.add('hidden');
+  $('pic').textContent = '';
+  $('bigWord').classList.add('hidden');
+  $('choices').innerHTML='';
+  $('slots').classList.add('hidden');
+  $('tiles').classList.add('hidden');
+
+  const ti = $('typeInput');
+  ti.classList.remove('hidden');
+  ti.value = '';
+  ti.disabled = false;
+  ti.readOnly = false;
+  ti.placeholder = item.kind==='sentence' ? '打成句英文…' : '打英文字…';
+
+  $('parentTip').classList.remove('hidden');
+  $('parentTip').textContent = '🔊 請家長讀出：「'+item.speak+'」（聽唔到就撳「讀」）';
+
+  const clear=document.createElement('button');
+  clear.type='button';
+  clear.className='btn-soft';
+  clear.textContent='清除';
+  onTap(clear, function(){
+    if(typeLocked) return;
+    ti.value='';
+    $('feedback').textContent='';
+    $('feedback').className='feedback';
+    try{ ti.focus(); }catch(e){}
+  });
+  $('actions').appendChild(clear);
+
+  const check=document.createElement('button');
+  check.type='button';
+  check.className='btn-primary';
+  check.textContent='檢查 ✓';
+  onTap(check, function(){ checkType(item); });
+  $('actions').appendChild(check);
+
+  addSpeakBtn(item.speak);
+
+  ti.onkeydown = function(ev){
+    if(ev.key==='Enter'){
+      ev.preventDefault();
+      checkType(item);
+    }
+  };
+  setTimeout(function(){ try{ ti.focus(); }catch(e){} }, 350);
+}
+
+function checkType(item){
+  if(typeLocked) return;
+  const ti = $('typeInput');
+  const got = ti.value;
+  if(!normType(got)){
+    wrong('試吓打啲字先～');
+    return;
+  }
+  if(typeMatch(got, item)){
+    typeLocked = true;
+    ti.disabled = true;
+    if(item.emoji){
+      $('pic').classList.remove('hidden');
+      $('pic').textContent = item.emoji;
+    }
+    $('bigWord').classList.remove('hidden');
+    $('bigWord').textContent = item.reveal;
+    correct(item.kind==='sentence' ? 2 : 1);
+    return;
+  }
+  typeFails++;
+  if(typeFails >= 3){
+    typeLocked = true;
+    ti.disabled = true;
+    ti.value = item.reveal;
+    $('bigWord').classList.remove('hidden');
+    $('bigWord').textContent = item.reveal;
+    if(item.emoji){
+      $('pic').classList.remove('hidden');
+      $('pic').textContent = item.emoji;
+    }
+    wrong('答案係：「'+item.reveal+'」· 下一題繼續加油！');
+    setTimeout(function(){ idx++; renderQ(); }, 1800);
+    return;
+  }
+  wrong('再聽多次再打（仲有 '+(3-typeFails)+' 次機會）');
+  speak(item.speak);
+}
+
+function finishRound(){
+  $('bar').style.width='100%';
+  $('resultScore').textContent = '⭐ +'+roundStars;
+  $('resultTitle').textContent = roundStars>=Math.max(3, Math.floor(queue.length*0.6)) ? '🎉 超叻！' : '🌟 做得好！';
+  $('resultMsg').textContent = '呢回合攞到 '+roundStars+' 粒星。累積共 '+totalStars+' 粒星。可以再玩第二個模式～';
+  showScreen('result');
+}
+
+/* ===== WIRE UI (runs even if speechSynthesis missing) ===== */
+function wireUI(){
+  document.querySelectorAll('.mode-btn').forEach(function(btn){
+    btn.type = btn.type || 'button';
+    onTap(btn, function(){ startMode(btn.dataset.mode); });
+  });
+  onTap($('btnHome'), function(){
+    try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}
+    showScreen('home'); updateStars();
+  });
+  onTap($('btnToHome'), function(){ showScreen('home'); updateStars(); });
+  onTap($('btnAgain'), function(){ if(mode) startMode(mode); });
+  updateStars();
+  try{
+    const boot = $('bootBanner');
+    if(boot) boot.textContent = '✅ 遊戲已載入';
+  }catch(e){}
+}
+
+try{
+  wireUI();
+}catch(e){
+  try{
+    const boot = document.getElementById('bootBanner');
+    if(boot) boot.textContent = '⚠️ 載入失敗 — 請用 Safari 開啟';
+  }catch(e2){}
+}
+</script>
+</body>
+</html>
