@@ -74,13 +74,35 @@ h1{font-size:1.45rem;line-height:1.3;margin:4px 0 6px}
   box-shadow:0 4px 12px rgba(255,107,138,.35);cursor:pointer
 }
 .letter-tile.used{opacity:.35;pointer-events:none}
-.type-input{
-  display:block;width:100%;margin:14px 0 6px;padding:16px 14px;
-  font-size:clamp(1.4rem,6vw,1.9rem);font-weight:700;text-align:center;
+.type-display{
+  min-height:64px;margin:12px 0 10px;padding:16px 14px;
+  font-size:clamp(1.5rem,6.5vw,2rem);font-weight:800;text-align:center;
+  letter-spacing:.04em;word-break:break-word;
   border:3px solid #e8d8e8;border-radius:16px;background:#fffafc;color:var(--ink);
-  outline:none;-webkit-appearance:none;appearance:none
+  line-height:1.35
 }
-.type-input:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(255,143,171,.25)}
+.type-display.empty{color:#c0a8b8;font-weight:700;letter-spacing:0;font-size:1.1rem}
+.type-display.locked{opacity:.85;border-color:var(--green);background:#f0fff4}
+.osk{
+  display:none;margin:8px 0 4px;user-select:none;-webkit-user-select:none
+}
+.osk.show{display:block}
+.osk-row{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:6px
+}
+.osk-key{
+  width:calc((100% - 48px) / 7);min-width:40px;max-width:52px;height:48px;
+  border:none;border-radius:12px;background:linear-gradient(145deg,#fff,#f3e8f0);
+  box-shadow:0 3px 8px rgba(90,60,80,.12);font-size:1.25rem;font-weight:800;
+  color:var(--ink);cursor:pointer;padding:0
+}
+.osk-key:active{transform:scale(.94);background:#ffe0ec}
+.osk-key.wide{
+  width:auto;min-width:72px;max-width:none;flex:1;padding:0 10px;font-size:1rem
+}
+.osk-key.caps-on{background:linear-gradient(145deg,var(--yellow),#ffd040);box-shadow:0 3px 10px rgba(255,200,40,.4)}
+.osk-key.danger{background:linear-gradient(145deg,#ffe8e8,#ffd0d0)}
+.osk-key.space{flex:2.2;min-width:120px;max-width:none;font-size:.95rem}
 .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
 .btn-primary,.btn-soft{
   border:none;border-radius:999px;padding:14px 22px;font-size:1.1rem;font-weight:800;
@@ -149,7 +171,8 @@ h1{font-size:1.45rem;line-height:1.3;margin:4px 0 6px}
     <div class="sentence hidden" id="sentenceBox"></div>
     <div class="letters hidden" id="slots"></div>
     <div class="letters hidden" id="tiles"></div>
-    <input type="text" id="typeInput" class="type-input hidden" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" inputmode="text" placeholder="喺呢度打英文字…">
+    <div id="typeDisplay" class="type-display empty hidden" aria-live="polite">撳下面字母串字…</div>
+    <div id="osk" class="osk" aria-label="螢幕鍵盤"></div>
     <div class="choices" id="choices"></div>
     <div class="feedback" id="feedback"></div>
     <div class="actions" id="actions"></div>
@@ -246,6 +269,8 @@ let spellAnswer = '';
 let spellBuilt = [];
 let typeFails = 0;
 let typeLocked = false;
+let typeBuilt = '';
+let capsOn = false;
 
 const $ = id => document.getElementById(id);
 function showScreen(id){
@@ -348,12 +373,12 @@ try{
 /* ===== MODE START ===== */
 const MODE_META = {
   listen:{title:'🎧 聽詞揀圖', tip:'聽英文字，再揀啱嘅圖。'},
-  spell:{title:'🔤 睇圖拼詞', tip:'睇圖，再排啱字母。'},
+  spell:{title:'🔤 睇圖拼詞', tip:'睇圖，排字本身（唔使 a）。'},
   sentence:{title:'✏️ 句子填空', tip:'揀啱個字填入句子。'},
   hf:{title:'⚡ 高頻字快閃', tip:'記住個字，再快啲搵出嚟。'},
   phonics:{title:'🔊 Phonics 聽音', tip:'聽／睇字，揀啱嘅 s / a / t 字。'},
   dictation:{title:'📝 模擬默書', tip:'家長撳「讀」，小朋友揀／拼出答案。'},
-  type:{title:'⌨️ 真串字', tip:'聽完自己打，冇提示冇揀。'}
+  type:{title:'⌨️ 真串字', tip:'聽完用螢幕 a–z 鍵串，冇提示冇揀。'}
 };
 
 function startMode(m){
@@ -371,7 +396,8 @@ function buildQueue(m){
     return shuffle(VOCAB.map(v=>({type:'listen', item:v})));
   }
   if(m==='spell'){
-    return shuffle(VOCAB.map(v=>({type:'spell', item:v, target:v.text})));
+    /* target = bare word only (no article "a ") */
+    return shuffle(VOCAB.map(v=>({type:'spell', item:v, target:v.word})));
   }
   if(m==='sentence'){
     return shuffle(SENTENCES.map(s=>({type:'sentence', item:s})));
@@ -440,12 +466,17 @@ function clearPlay(){
   $('sentenceBox').innerHTML='';
   $('slots').classList.add('hidden'); $('slots').innerHTML='';
   $('tiles').classList.add('hidden'); $('tiles').innerHTML='';
-  const ti=$('typeInput');
-  if(ti){
-    ti.classList.add('hidden');
-    ti.value='';
-    ti.disabled=false;
-    ti.readOnly=false;
+  const td=$('typeDisplay');
+  if(td){
+    td.classList.add('hidden');
+    td.classList.add('empty');
+    td.classList.remove('locked');
+    td.textContent='撳下面字母串字…';
+  }
+  const osk=$('osk');
+  if(osk){
+    osk.classList.remove('show');
+    osk.innerHTML='';
   }
   $('choices').innerHTML='';
   $('choices').className='choices';
@@ -455,6 +486,7 @@ function clearPlay(){
   $('parentTip').classList.add('hidden');
   spellBuilt=[]; spellAnswer='';
   typeFails=0; typeLocked=false;
+  typeBuilt=''; capsOn=false;
 }
 
 function renderQ(){
@@ -565,7 +597,10 @@ function renderSpell(v, target){
   check.className='btn-primary'; check.textContent='檢查 ✓';
   onTap(check, function(){ checkSpell(); });
   $('actions').appendChild(check);
-  addSpeakBtn(target);
+  /* Speak bare word (matches what child spells); tip notes dictation may include "a" */
+  addSpeakBtn(v.word);
+  $('parentTip').classList.remove('hidden');
+  $('parentTip').textContent = '拼詞只要字本身（例如 car）。默書紙可能係 a car。';
 }
 
 function placeLetter(tile){
@@ -733,7 +768,7 @@ function renderDictPh(p){
   });
 }
 
-/* --- True type / 真串字 --- */
+/* --- True type / 真串字 (on-screen a–z keyboard) --- */
 function normType(s){
   return String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
 }
@@ -758,11 +793,114 @@ function typeMatch(got, item){
   return item.accept.some(function(a){ return normType(a)===g; });
 }
 
+function updateTypeDisplay(){
+  const td = $('typeDisplay');
+  if(!td) return;
+  if(!typeBuilt){
+    td.textContent = '撳下面字母串字…';
+    td.classList.add('empty');
+  } else {
+    td.textContent = typeBuilt;
+    td.classList.remove('empty');
+  }
+}
+
+function buildOsk(item){
+  const osk = $('osk');
+  osk.innerHTML = '';
+  osk.classList.add('show');
+  capsOn = false;
+
+  const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+  /* 4 rows: 7 + 7 + 7 + 5  (a–z alphabetical, not QWERTY) */
+  const rows = [letters.slice(0,7), letters.slice(7,14), letters.slice(14,21), letters.slice(21,26)];
+
+  rows.forEach(function(row){
+    const rowEl = document.createElement('div');
+    rowEl.className = 'osk-row';
+    row.forEach(function(ch){
+      const k = document.createElement('button');
+      k.type = 'button';
+      k.className = 'osk-key';
+      k.textContent = capsOn ? ch.toUpperCase() : ch;
+      k.dataset.ch = ch;
+      onTap(k, function(){
+        if(typeLocked) return;
+        const out = capsOn ? ch.toUpperCase() : ch;
+        typeBuilt += out;
+        updateTypeDisplay();
+        $('feedback').textContent='';
+        $('feedback').className='feedback';
+      });
+      rowEl.appendChild(k);
+    });
+    osk.appendChild(rowEl);
+  });
+
+  /* Special row: Caps · Space · . · ⌫ */
+  const special = document.createElement('div');
+  special.className = 'osk-row';
+
+  const caps = document.createElement('button');
+  caps.type = 'button';
+  caps.className = 'osk-key wide';
+  caps.id = 'oskCaps';
+  caps.textContent = '大楷 A⇄a';
+  onTap(caps, function(){
+    if(typeLocked) return;
+    capsOn = !capsOn;
+    caps.classList.toggle('caps-on', capsOn);
+    /* refresh letter labels */
+    osk.querySelectorAll('.osk-key[data-ch]').forEach(function(btn){
+      const c = btn.dataset.ch;
+      btn.textContent = capsOn ? c.toUpperCase() : c;
+    });
+  });
+  special.appendChild(caps);
+
+  const space = document.createElement('button');
+  space.type = 'button';
+  space.className = 'osk-key wide space';
+  space.textContent = '空白 Space';
+  onTap(space, function(){
+    if(typeLocked) return;
+    typeBuilt += ' ';
+    updateTypeDisplay();
+  });
+  special.appendChild(space);
+
+  const period = document.createElement('button');
+  period.type = 'button';
+  period.className = 'osk-key wide';
+  period.textContent = '.';
+  onTap(period, function(){
+    if(typeLocked) return;
+    typeBuilt += '.';
+    updateTypeDisplay();
+  });
+  special.appendChild(period);
+
+  const bksp = document.createElement('button');
+  bksp.type = 'button';
+  bksp.className = 'osk-key wide danger';
+  bksp.textContent = '⌫ 刪除';
+  onTap(bksp, function(){
+    if(typeLocked) return;
+    typeBuilt = typeBuilt.slice(0, -1);
+    updateTypeDisplay();
+  });
+  special.appendChild(bksp);
+
+  osk.appendChild(special);
+}
+
 function renderType(item){
   typeFails = 0;
   typeLocked = false;
+  typeBuilt = '';
+  capsOn = false;
   $('actions').innerHTML='';
-  $('prompt').textContent = '聽完自己打英文（冇提示）';
+  $('prompt').textContent = '聽完自己串英文（螢幕鍵盤 · 冇提示）';
   $('pic').classList.add('hidden');
   $('pic').textContent = '';
   $('bigWord').classList.add('hidden');
@@ -770,15 +908,14 @@ function renderType(item){
   $('slots').classList.add('hidden');
   $('tiles').classList.add('hidden');
 
-  const ti = $('typeInput');
-  ti.classList.remove('hidden');
-  ti.value = '';
-  ti.disabled = false;
-  ti.readOnly = false;
-  ti.placeholder = item.kind==='sentence' ? '打成句英文…' : '打英文字…';
+  const td = $('typeDisplay');
+  td.classList.remove('hidden');
+  td.classList.remove('locked');
+  updateTypeDisplay();
+  buildOsk(item);
 
   $('parentTip').classList.remove('hidden');
-  $('parentTip').textContent = '🔊 請家長讀出：「'+item.speak+'」（聽唔到就撳「讀」）';
+  $('parentTip').textContent = '🔊 請家長讀出：「'+item.speak+'」（聽唔到就撳「讀」）。用下面 a–z 鍵串字，唔使系統鍵盤。';
 
   const clear=document.createElement('button');
   clear.type='button';
@@ -786,10 +923,10 @@ function renderType(item){
   clear.textContent='清除';
   onTap(clear, function(){
     if(typeLocked) return;
-    ti.value='';
+    typeBuilt='';
+    updateTypeDisplay();
     $('feedback').textContent='';
     $('feedback').className='feedback';
-    try{ ti.focus(); }catch(e){}
   });
   $('actions').appendChild(clear);
 
@@ -801,27 +938,19 @@ function renderType(item){
   $('actions').appendChild(check);
 
   addSpeakBtn(item.speak);
-
-  ti.onkeydown = function(ev){
-    if(ev.key==='Enter'){
-      ev.preventDefault();
-      checkType(item);
-    }
-  };
-  setTimeout(function(){ try{ ti.focus(); }catch(e){} }, 350);
 }
 
 function checkType(item){
   if(typeLocked) return;
-  const ti = $('typeInput');
-  const got = ti.value;
+  const got = typeBuilt;
   if(!normType(got)){
-    wrong('試吓打啲字先～');
+    wrong('試吓撳字母串字先～');
     return;
   }
   if(typeMatch(got, item)){
     typeLocked = true;
-    ti.disabled = true;
+    const td = $('typeDisplay');
+    if(td) td.classList.add('locked');
     if(item.emoji){
       $('pic').classList.remove('hidden');
       $('pic').textContent = item.emoji;
@@ -834,8 +963,10 @@ function checkType(item){
   typeFails++;
   if(typeFails >= 3){
     typeLocked = true;
-    ti.disabled = true;
-    ti.value = item.reveal;
+    typeBuilt = item.reveal;
+    updateTypeDisplay();
+    const td = $('typeDisplay');
+    if(td) td.classList.add('locked');
     $('bigWord').classList.remove('hidden');
     $('bigWord').textContent = item.reveal;
     if(item.emoji){
@@ -846,7 +977,7 @@ function checkType(item){
     setTimeout(function(){ idx++; renderQ(); }, 1800);
     return;
   }
-  wrong('再聽多次再打（仲有 '+(3-typeFails)+' 次機會）');
+  wrong('再聽多次再串（仲有 '+(3-typeFails)+' 次機會）');
   speak(item.speak);
 }
 
