@@ -1,4 +1,500 @@
-<!DOCTYPE html>
+<!DOC<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小一英文默書句子特訓強版 · Colourful toys</title>
+  <style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;background:#f0f4f8;color:#2d3748;padding:12px;max-width:600px;margin:0 auto}
+  .card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 8px 20px rgba(0,0,0,0.06);margin-bottom:14px}
+  .title{font-size:1.25rem;font-weight:800;color:#2b6cb0;text-align:center;margin-bottom:4px}
+  .subtitle{font-size:0.85rem;color:#718096;text-align:center;margin-bottom:12px}
+  .grid{display:grid;grid-template-columns:1fr;gap:10px}
+  .btn{background:#edf2f7;border:2px solid #cbd5e0;border-radius:14px;padding:12px;font-size:1rem;font-weight:700;color:#2d3748;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:all 0.2s}
+  .btn:active{transform:scale(0.98);background:#e2e8f0}
+  .btn-primary{background:#3182ce;color:#fff;border:none;justify-content:center;padding:12px 20px;font-size:1.05rem;border-radius:12px;width:100%}
+  .btn-speech{background:#4299e1;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-size:0.9rem;font-weight:700;margin:4px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .badge{background:#ebf8ff;color:#2b6cb0;padding:4px 8px;border-radius:8px;font-size:0.8rem;font-weight:700}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .tag{background:#feebc8;color:#c05621;padding:4px 8px;border-radius:6px;font-size:0.8rem;font-weight:700}
+  .word-card{display:inline-block;background:#e2e8f0;border:2px solid #cbd5e0;border-radius:10px;padding:8px 12px;margin:4px;font-size:1.1rem;font-weight:700;cursor:pointer;user-select:none}
+  .word-card.selected{background:#bee3f8;border-color:#3182ce;color:#2b6cb0}
+  .letter-card{display:inline-block;background:#feebc8;border:2px solid #fbd38d;border-radius:8px;padding:10px 14px;margin:4px;font-size:1.2rem;font-weight:800;cursor:pointer}
+  .slot-box{min-height:50px;border:2px dashed #cbd5e0;border-radius:12px;padding:8px;margin:12px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#faf5ff}
+  .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .choice-btn{background:#fff;border:2px solid #e2e8f0;border-radius:12px;padding:14px;font-size:1.1rem;font-weight:700;cursor:pointer;text-align:center}
+  .choice-btn:active{background:#edf2f7}
+  .input-box{width:100%;padding:12px;font-size:1.1rem;border:2px solid #cbd5e0;border-radius:12px;margin:10px 0;outline:none}
+  .tip-box{background:#fffaf0;border-left:4px solid #dd6b20;padding:10px;border-radius:6px;font-size:0.9rem;color:#9c4221;margin:10px 0}
+  .feedback{font-size:1.1rem;font-weight:800;text-align:center;margin:10px 0;min-height:28px}
+  .correct{color:#38a169}
+  .wrong{color:#e53e3e}
+  .hidden{display:none}
+  </style>
+  </head>
+<body>
+
+  <div id="homeView">
+      <div class="card">
+            <div class="title">佛教榮茵學校 · P.1 英文默書</div>div>
+            <div class="subtitle">1B Chapter 1 Colourful toys (16 Oct)<br><b>句子特訓強化版</b></div>div>
+          <div style="text-align:center;margin-bottom:12px"><span class="tag">⭐ 得分: <span id="totalStars">0</span>span></span>span></div>div>
+          
+          <div style="font-weight:800;margin:10px 0 6px 4px;color:#2b6cb0">🚂 句子特訓四步曲（重點句專攻）：</div>div>
+          <div class="grid">
+                <button class="btn" onclick="startMode('m1')"><span>🚂 模式 1：句子火車排排坐</span><span class="badge">重組句子</span></button>button>
+                <button class="btn" onclick="startMode('m2')"><span>🧩 模式 2：句子重點字填空</span><span class="badge">全方位挖空 14 字</span></button>button>
+                <button class="btn" onclick="startMode('m3')"><span>🔤 模式 3：句子拆字逐個串</span><span class="badge">語境拼字</span></button>button>
+                <button class="btn" onclick="startMode('m4')"><span>📝 模式 4句子模擬真默書</span><span class="badge">全句聽默</span></button>button>
+          </div>div>
+      
+          <div style="font-weight:800;margin:16px 0 6px 4px;color:#2b6cb0">🎡 其他範圍綜合快溫：</div>div>
+          <div class="grid">
+                <button class="btn" onclick="startMode('vocab')"><span>🪆 Vocabulary 詞彙配對</span><span class="badge">6 個玩具生字</span></button>button>
+                <button class="btn" onclick="startMode('hf')"><span>⚡ High Frequency Words 快閃</span><span class="badge">6 個高頻字</span></button>button>
+                <button class="btn" onclick="startMode('phonics')"><span>🔊 Phonics 發音配對</span><span class="badge">s / a / t 音</span></button>button>
+          </div>div>
+      </div>div>
+  </div>div>
+
+<div id="playView" class="hidden">
+  <div class="topbar">
+      <button class="btn" style="padding:6px 12px;font-size:0.85rem" onclick="goHome()">⬅️ 返回主頁</button>button>
+      <span id="modeHeader" style="font-weight:800;color:#2b6cb0"></span>
+      <span class="tag">⭐ <span id="gameStars">0</span></span>
+  </div>div>
+
+  <div class="card">
+      <div id="speechControls" style="text-align:center;margin-bottom:10px" class="hidden">
+            <button class="btn-speech" onclick="speakCurrent(1.0)">🔊 讀成句</button>button>
+            <button class="btn-speech" style="background:#dd6b20" onclick="speakCurrent(0.5)">🐢 個字讀</button>button>
+      </div>div>
+  
+      <div id="promptText" style="font-size:1.15rem;font-weight:700;text-align:center;margin-bottom:10px;color:#2d3748"></div>div>
+      <div id="tipContainer" class="tip-box hidden"></div>div>
+  
+      <div id="m1Area" class="hidden">
+            <div style="font-size:0.9rem;color:#718096;margin-bottom:4px">點擊下方字卡排列句子：</div>div>
+            <div id="m1Slots" class="slot-box"></div>div>
+            <div id="m1Pool" style="text-align:center;margin-top:8px"></div>div>
+      </div>div>
+  
+      <div id="choiceArea" class="choice-grid hidden"></div>div>
+  
+      <div id="m3Area" class="hidden">
+            <div id="m3TargetWord" style="font-size:1.3rem;font-weight:800;color:#e53e3e;text-align:center;margin:8px 0"></div>div>
+            <div id="m3Slots" class="slot-box" style="justify-content:center"></div>div>
+            <div id="m3Pool" style="text-align:center"></div>div>
+      </div>div>
+  
+      <div id="m4Area" class="hidden">
+            <div style="text-align:center;margin-bottom:8px">
+                    <button class="btn-speech" style="background:#805ad5" onclick="peekHint()">👁️ 偷睇一秒提示</button>button>
+            </div>div>
+            <div id="peekBox" style="font-size:1.1rem;font-weight:800;color:#805ad5;text-align:center;min-height:24px;margin-bottom:8px"></div>div>
+            <input type="text" id="m4Input" class="input-box" placeholder="輸入完整英文句子 (留意大細楷及標點)..." autocomplete="off" autocapitalize="off">
+            <button class="btn-primary" onclick="checkM4()">提交答案 Check</button>button>
+      </div>div>
+  
+      <div id="feedback" class="feedback"></div>div>
+      <button id="nextBtn" class="btn-primary hidden" style="margin-top:12px" onclick="nextQuestion()">下一題 Next ➔</button>button>
+  </div>div>
+</div>div>
+
+<script>
+  const SENTENCES = [
+    {
+          full: "It is yellow and blue.",
+          words: ["It", "is", "yellow", "and", "blue", "."],
+          tips: "提示：句首大楷 It、句號 `.`、yellow 有兩個 l",
+          clozes: [
+            {blank: "It", text: "___ is yellow and blue.", choices: ["It", "Is", "it", "They"], tip: "句首必須大寫 It"},
+            {blank: "yellow", text: "It is ___ and blue.", choices: ["yellow", "yelow", "blue", "green"], tip: "yellow 有兩個 l"},
+            {blank: "and", text: "It is yellow ___ blue.", choices: ["and", "or", "but", "with"], tip: "and 表示「和」"},
+            {blank: "blue", text: "It is yellow and ___.", choices: ["blue", "bleu", "red", "purple"], tip: "blue 拼法 b-l-u-e"}
+                ]
+    },
+    {
+          full: "What colour are the teddy bears?",
+          words: ["What", "colour", "are", "the", "teddy", "bears", "?"],
+          tips: "提示：疑問詞大楷 What、句尾問號 `?`、記得 the、眾數 bears 加 s",
+          clozes: [
+            {blank: "What", text: "___ colour are the teddy bears?", choices: ["What", "what", "How", "Where"], tip: "疑問詞句首大寫 What"},
+            {blank: "colour", text: "What ___ are the teddy bears?", choices: ["colour", "color", "colours", "toy"], tip: "英式拼法 c-o-l-o-u-r"},
+            {blank: "are", text: "What colour ___ the teddy bears?", choices: ["are", "is", "am", "be"], tip: "眾數 bears 配 are"},
+            {blank: "the", text: "What colour are ___ teddy bears?", choices: ["the", "a", "an", "this"], tip: "記得加指定冠詞 the"},
+            {blank: "teddy", text: "What colour are the ___ bears?", choices: ["teddy", "tedy", "bear", "toy"], tip: "teddy 雙寫 d (t-e-d-d-y)"},
+            {blank: "bears", text: "What colour are the teddy ___?", choices: ["bears", "bear", "beares", "dolls"], tip: "眾數 bears 記得加 s"}
+                ]
+    },
+    {
+          full: "My cars are purple and white.",
+          words: ["My", "cars", "are", "purple", "and", "white", "."],
+          tips: "提示：句首大楷 My、眾數 cars 加 s 配 are、purple 同 white 字尾 e",
+          clozes: [
+            {blank: "My", text: "___ cars are purple and white.", choices: ["My", "my", "Me", "I"], tip: "句首大寫 My"},
+            {blank: "cars", text: "My ___ are purple and white.", choices: ["cars", "car", "caes", "trains"], tip: "眾數 cars 記得加 s"},
+            {blank: "purple", text: "My cars are ___ and white.", choices: ["purple", "paple", "blue", "pink"], tip: "purple 字尾有 e (p-u-r-p-l-e)"},
+            {blank: "white", text: "My cars are purple and ___.", choices: ["white", "wite", "black", "yellow"], tip: "white 字尾有 e (w-h-i-t-e)"}
+                ]
+    }
+    ];
+
+  const VOCAB = [
+    {word: "a doll", emoji: "🪆", choices: ["a doll", "a robot", "a car", "a train"]},
+    {word: "a robot", emoji: "🤖", choices: ["a robot", "a doll", "a ball", "a plane"]},
+    {word: "a car", emoji: "🚗", choices: ["a car", "a train", "a plane", "a robot"]},
+    {word: "a train", emoji: "🚂", choices: ["a train", "a car", "a ball", "a doll"]},
+    {word: "a ball", emoji: "⚽", choices: ["a ball", "a plane", "a doll", "a car"]},
+    {word: "a plane", emoji: "✈️", choices: ["a plane", "a train", "a robot", "a ball"]}
+    ];
+
+  const HF = [
+    {word: "she", choices: ["she", "he", "this", "six"]},
+    {word: "in", choices: ["in", "on", "old", "is"]},
+    {word: "old", choices: ["old", "on", "in", "six"]},
+    {word: "six", choices: ["six", "this", "she", "old"]},
+    {word: "this", choices: ["this", "she", "six", "that"]},
+    {word: "on", choices: ["on", "in", "old", "an"]}
+    ];
+
+  const PHONICS = [
+    {sound: "s", target: "sun", emoji: "☀️", choices: ["sun", "apple", "turtle", "teeth"]},
+    {sound: "s", target: "sand", emoji: "🏖️", choices: ["sand", "axe", "teeth", "apple"]},
+    {sound: "a", target: "apple", emoji: "🍎", choices: ["apple", "sun", "turtle", "sand"]},
+    {sound: "a", target: "axe", emoji: "🪓", choices: ["axe", "teeth", "sand", "sun"]},
+    {sound: "t", target: "turtle", emoji: "🐢", choices: ["turtle", "sun", "apple", "sand"]},
+    {sound: "t", target: "teeth", emoji: "🦷", choices: ["teeth", "axe", "apple", "turtle"]}
+    ];
+
+  let currentMode = "";
+  let questions = [];
+  let qIndex = 0;
+  let stars = parseInt(localStorage.getItem("p1_stars") || "0");
+  let m1Selected = [];
+  let m3Letters = [];
+
+  document.getElementById("totalStars").innerText = stars;
+
+  function goHome() {
+      document.getElementById("homeView").classList.remove("hidden");
+      document.getElementById("playView").classList.add("hidden");
+      document.getElementById("totalStars").innerText = stars;
+  }
+
+  function startMode(mode) {
+      currentMode = mode;
+      qIndex = 0;
+      questions = [];
+
+      const speechEl = document.getElementById("speechControls");
+      speechEl.classList.add("hidden");
+
+      if (mode === 'm1') {
+            document.getElementById("modeHeader").innerText = "🚂 模式 1：句子火車排排";
+            questions = SENTENCES.map(s => ({type: 'm1', data: s}));
+      } else if (mode === 'm2') {
+            document.getElementById("modeHeader").innerText = "🧩 模式 2：句子重點字填空";
+            SENTENCES.forEach(s => {
+                    s.clozes.forEach(c => {
+                              questions.push({type: 'm2', full: s.full, cloze: c});
+                    });
+            });
+      } else if (mode === 'm3') {
+            document.getElementById("modeHeader").innerText = "🔤 模式 3：句子拆字逐個串";
+            SENTENCES.forEach(s => {
+                    s.clozes.forEach(c => {
+                              questions.push({type: 'm3', full: s.full, target: c.blank, tip: c.tip});
+                    });
+            });
+      } else if (mode === 'm4') {
+            document.getElementById("modeHeader").innerText = "📝 模式 4：句子模擬真默書";
+            questions = SENTENCES.map(s => ({type: 'm4', data: s}));
+            speechEl.classList.remove("hidden");
+      } else if (mode === 'vocab') {
+            document.getElementById("modeHeader").innerText = "🪆 Vocabulary 詞彙配對";
+            questions = VOCAB.map(v => ({type: 'vocab', data: v}));
+      } else if (mode === 'hf') {
+            document.getElementById("modeHeader").innerText = "⚡ High Frequency Words";
+            questions = HF.map(h => ({type: 'hf', data: h}));
+      } else if (mode === 'phonics') {
+            document.getElementById("modeHeader").innerText = "🔊 Phonics 發音配對";
+            questions = PHONICS.map(p => ({type: 'phonics', data: p}));
+      }
+
+      questions = questions.sort(() => Math.random() - 0.5);
+
+      document.getElementById("homeView").classList.add("hidden");
+      document.getElementById("playView").classList.remove("hidden");
+      loadQuestion();
+  }
+
+  function speakCurrent(rate = 1.0) {
+      const q = questions[qIndex];
+      let text = "";
+      if (q.type === 'm4' || q.type === 'm1') text = q.data.full;
+      else if (q.type === 'm2') text = q.cloze.text.replace('___', q.cloze.blank);
+      else if (q.type === 'm3') text = q.target;
+      else if (q.type === 'vocab') text = q.data.word;
+      else if (q.type === 'hf') text = q.data.word;
+      else if (q.type === 'phonics') text = q.data.target;
+
+      if (!text) return;
+
+      if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            if (rate < 0.8) {
+                    const words = text.split(" ");
+                    let delay = 0;
+                    words.forEach((w) => {
+                              setTimeout(() => {
+                                          const u = new SpeechSynthesisUtterance(w);
+                                          u.lang = 'en-US';
+                                          u.rate = 0.6;
+                                          window.speechSynthesis.speak(u);
+                              }, delay);
+                              delay += 750;
+                    });
+            } else {
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'en-US';
+                    u.rate = rate;
+                    window.speechSynthesis.speak(u);
+            }
+      }
+  }
+
+  function loadQuestion() {
+      document.getElementById("feedback").innerText = "";
+      document.getElementById("feedback").className = "feedback";
+      document.getElementById("nextBtn").classList.add("hidden");
+      document.getElementById("gameStars").innerText = stars;
+      document.getElementById("peekBox").innerText = "";
+
+      const tipContainer = document.getElementById("tipContainer");
+      tipContainer.classList.add("hidden");
+
+      ['m1Area', 'choiceArea', 'm3Area', 'm4Area'].forEach(id => document.getElementById(id).classList.add("hidden"));
+
+      if (qIndex >= questions.length) {
+            document.getElementById("promptText").innerText = "🎉 恭喜完成此模式特訓！";
+            document.getElementById("nextBtn").innerText = "🏠 返回主頁";
+            document.getElementById("nextBtn").onclick = goHome;
+            document.getElementById("nextBtn").classList.remove("hidden");
+            return;
+      }
+
+      const q = questions[qIndex];
+
+      if (q.type === 'm1') {
+            document.getElementById("m1Area").classList.remove("hidden");
+            document.getElementById("promptText").innerText = "請排成完整句子：";
+            tipContainer.innerText = q.data.tips;
+            tipContainer.classList.remove("hidden");
+            speakCurrent(1.0);
+
+            m1Selected = [];
+            renderM1();
+      } else if (q.type === 'm2') {
+            document.getElementById("choiceArea").classList.remove("hidden");
+            document.getElementById("promptText").innerText = q.cloze.text;
+            tipContainer.innerText = "💡 " + q.cloze.tip;
+            tipContainer.classList.remove("hidden");
+            speakCurrent(1.0);
+
+            renderChoices(q.cloze.choices, q.cloze.blank);
+      } else if (q.type === 'm3') {
+            document.getElementById("m3Area").classList.remove("hidden");
+            document.getElementById("promptText").innerText = "句子： " + q.full;
+            document.getElementById("m3TargetWord").innerText = "🎯 拼出目標字 " + q.target;
+            tipContainer.innerText = "💡 " + q.tip;
+            tipContainer.classList.remove("hidden");
+
+            m3Letters = [];
+            renderM3(q.target);
+      } else if (q.type === 'm4') {
+            document.getElementById("m4Area").classList.remove("hidden");
+            document.getElementById("promptText").innerText = "🎧 聽廣播，入完整英文句子";
+            document.getElementById("m4Input").value = "";
+            tipContainer.innerText = q.data.tips;
+            tipContainer.classList.remove("hidden");
+            speakCurrent(1.0);
+      } else if (q.type === 'vocab') {
+            document.getElementById("choiceArea").classList.remove("hidden");
+            document.getElementById("promptText").innerText = q.data.emoji + " 這是甚麼？";
+            speakCurrent(1.0);
+            renderChoices(q.data.choices, q.data.word);
+      } else if (q.type === 'hf') {
+            document.getElementById("choiceArea").classList.remove("hidden");
+            document.getElementById("promptText").innerText = "⚡ 聽聲音 / 選出高頻字：" + q.data.word;
+            speakCurrent(1.0);
+            renderChoices(q.data.choices, q.data.word);
+      } else if (q.type === 'phonics') {
+            document.getElementById("choiceArea").classList.remove("hidden");
+            document.getElementById("promptText").innerText = q.data.emoji + " 發音 /" + q.data.sound + "/ 的生字：";
+            speakCurrent(1.0);
+            renderChoices(q.data.choices, q.data.target);
+      }
+  }
+
+  function renderM1() {
+      const q = questions[qIndex].data;
+      const slots = document.getElementById("m1Slots");
+      const pool = document.getElementById("m1Pool");
+      slots.innerHTML = "";
+      pool.innerHTML = "";
+
+      m1Selected.forEach((w, idx) => {
+            const span = document.createElement("span");
+            span.className = "word-card selected";
+            span.innerText = w;
+            span.onclick = () => { m1Selected.splice(idx, 1); renderM1(); };
+            slots.appendChild(span);
+      });
+
+      if (!pool.dataset.shuffled) {
+            pool.dataset.items = JSON.stringify([...q.words].sort(() => Math.random() - 0.5));
+            pool.dataset.shuffled = "true";
+      }
+      const items = JSON.parse(pool.dataset.items);
+
+      const counts = {};
+      items.forEach(w => counts[w] = (counts[w] || 0) + 1);
+      m1Selected.forEach(w => counts[w] = (counts[w] || 0) - 1);
+
+      items.forEach(w => {
+            if (counts[w] > 0) {
+                    counts[w]--;
+                    const span = document.createElement("span");
+                    span.className = "word-card";
+                    span.innerText = w;
+                    span.onclick = () => {
+                              m1Selected.push(w);
+                              renderM1();
+                              checkM1();
+                    };
+                    pool.appendChild(span);
+            }
+      });
+  }
+
+  function checkM1() {
+      const q = questions[qIndex].data;
+      let userSentence = m1Selected.join(" ").replace(" .", ".").replace(" ?", "?");
+      if (m1Selected.length === q.words.length) {
+            if (userSentence === q.full) {
+                    showFeedback(true, "✅ 排得好完美！答對了！");
+            } else {
+                    showFeedback(false, "❌ 順序有錯，再試試睇！正確：" + q.full);
+            }
+      }
+  }
+
+  function renderChoices(choices, correctAns) {
+      const area = document.getElementById("choiceArea");
+      area.innerHTML = "";
+      choices.forEach(c => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn";
+            btn.innerText = c;
+            btn.onclick = () => {
+                    if (c === correctAns) {
+                              showFeedback(true, "✅ 正確！太棒了！");
+                    } else {
+                              showFeedback(false, "❌ 答錯了，正確答案是: " + correctAns);
+                    }
+            };
+            area.appendChild(btn);
+      });
+  }
+
+  function renderM3(target) {
+      const slots = document.getElementById("m3Slots");
+      const pool = document.getElementById("m3Pool");
+      slots.innerHTML = "";
+      pool.innerHTML = "";
+
+      m3Letters.forEach((l, idx) => {
+            const span = document.createElement("span");
+            span.className = "letter-card";
+            span.innerText = l;
+            span.onclick = () => { m3Letters.splice(idx, 1); renderM3(target); };
+            slots.appendChild(span);
+      });
+
+      if (!pool.dataset.shuffled) {
+            pool.dataset.items = JSON.stringify(target.split("").sort(() => Math.random() - 0.5));
+            pool.dataset.shuffled = "true";
+      }
+      const items = JSON.parse(pool.dataset.items);
+      const counts = {};
+      items.forEach(l => counts[l] = (counts[l] || 0) + 1);
+      m3Letters.forEach(l => counts[l] = (counts[l] || 0) - 1);
+
+      items.forEach(l => {
+            if (counts[l] > 0) {
+                    counts[l]--;
+                    const span = document.createElement("span");
+                    span.className = "letter-card";
+                    span.innerText = l;
+                    span.onclick = () => {
+                              m3Letters.push(l);
+                              renderM3(target);
+                              if (m3Letters.join("") === target) {
+                                          showFeedback(true, "✅ 拼對了！" + target);
+                              } else if (m3Letters.length === target.length) {
+                                          showFeedback(false, "❌ 拼錯了，再試一次！");
+                              }
+                    };
+                    pool.appendChild(span);
+            }
+      });
+  }
+
+  function peekHint() {
+      const q = questions[qIndex];
+      const box = document.getElementById("peekBox");
+      box.innerText = q.data.full;
+      setTimeout(() => { box.innerText = ""; }, 1000);
+  }
+
+  function checkM4() {
+      const q = questions[qIndex].data;
+      const val = document.getElementById("m4Input").value.trim();
+      if (val === q.full) {
+            showFeedback(true, "💯 默寫完全正確！太厲害了！");
+      } else {
+            showFeedback(false, "❌ 唔同喔，請留意大細楷/生字/標點！\n正確：" + q.full);
+      }
+  }
+
+  function showFeedback(isCorrect, msg) {
+      const fb = document.getElementById("feedback");
+      fb.innerText = msg;
+      fb.className = "feedback " + (isCorrect ? "correct" : "wrong");
+
+      if (isCorrect) {
+            stars += 1;
+            localStorage.setItem("p1_stars", stars);
+            document.getElementById("gameStars").innerText = stars;
+      }
+
+      document.getElementById("nextBtn").innerText = "下一題 Next ➔";
+      document.getElementById("nextBtn").onclick = nextQuestion;
+      document.getElementById("nextBtn").classList.remove("hidden");
+  }
+
+  function nextQuestion() {
+      qIndex++;
+      loadQuestion();
+  }
+</script>
+</body>
+</html>html>
+</script></span></span></b>
+</body></title>
+  </head>TYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
